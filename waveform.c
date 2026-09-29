@@ -1,20 +1,19 @@
 #include <stdint.h>
-#define DDRB  (*(volatile uint8_t *) 0x24)
-#define PORTB (*(volatile uint8_t *) 0x25)
-
-void delay(volatile long time) {
-        while (time > 0)
-        {
-                time--;
-        }
-}
+#define DDRD   (*(volatile uint8_t *) 0x2A)
+//#define PORTD  (*(volatile uint8_t *) 0x2B)
+#define TCCR0A (*(volatile uint8_t *) 0x44)
+#define TCCR0B (*(volatile uint8_t *) 0x45)
+#define OCR0A  (*(volatile uint8_t *) 0x47)
 
 int main(void) {
-        DDRB |= (1 << 5);
+        DDRD |= (1 << 6);
+        OCR0A = 128;
+        TCCR0A |= (1 << 7);
+        TCCR0A |= (1 << 0);
+        TCCR0A |= (1 << 1);
+        TCCR0B |= (1 << 0);
 
         while(1)
         {
-                PORTB ^= (1 << 5);
-                delay(100000);
         }
 }

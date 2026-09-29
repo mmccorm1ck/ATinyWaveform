@@ -1,9 +1,4 @@
-#include <stdint.h>
-#define DDRD   (*(volatile uint8_t *) 0x2A)
-//#define PORTD  (*(volatile uint8_t *) 0x2B)
-#define TCCR0A (*(volatile uint8_t *) 0x44)
-#define TCCR0B (*(volatile uint8_t *) 0x45)
-#define OCR0A  (*(volatile uint8_t *) 0x47)
+#include <avr/io.h>
 
 int main(void) {
         DDRD |= (1 << 6);

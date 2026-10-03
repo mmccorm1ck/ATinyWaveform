@@ -7,6 +7,10 @@
 volatile bool fall   = false;
 volatile bool square = false;
 volatile bool sine   = false;
+volatile uint8_t i = 0;
+volatile uint8_t iTarg = 0;
+volatile uint8_t j = 0;
+volatile uint8_t jTarg = 0;
 volatile uint8_t count = 0;
 
 const uint8_t sinTable[128] PROGMEM =
@@ -30,6 +34,7 @@ const uint8_t sinTable[128] PROGMEM =
 };
 
 int main(void) {
+        DDRC  &= ~(1 << 0);
         DDRD   |= (1 << 6);
         DDRD  &= ~(1 << 2);
         PORTD  |= (1 << 2);
@@ -39,22 +44,55 @@ int main(void) {
         PCMSK2 |= (1 << 3);
         PCICR  |= (1 << 2);
         OCR0A = count;
+        OCR2A = 32;
         TCNT2 = 0;
         TCCR0A |= (1 << 7);
         TCCR0A |= (1 << 0);
         TCCR0A |= (1 << 1);
         TCCR0B |= (1 << 0);
-        TCCR2B |= (1 << 1);
-        TCCR2B |= (1 << 2);
-        TIMSK2 |= (1 << 0);
+        TCCR2B |= (1 << 0);
+        TIMSK2 |= (1 << 1);
+        ADMUX &= ~(1 << 7);
+        ADMUX  |= (1 << 6);
+        ADMUX &= ~(1 << 5);
+        ADMUX &= ~(1 << 3);
+        ADMUX &= ~(1 << 2);
+        ADMUX &= ~(1 << 1);
+        ADMUX &= ~(1 << 0);
+        DIDR0  |= (1 << 0);
+        ADCSRB&= ~(1 << 2);
+        ADCSRB&= ~(1 << 1);
+        ADCSRB&= ~(1 << 0);
+        ADCSRA |= (1 << 7);
+        ADCSRA |= (1 << 5);
+        ADCSRA |= (1 << 3);
+        ADCSRA |= (1 << 2);
+        ADCSRA |= (1 << 1);
         sei();
+        ADCSRA |= (1 << 6);
 
         while(1)
         {
         }
 }
 
-ISR(TIMER2_OVF_vect) {
+ISR(TIMER2_COMPA_vect) {
+        i++;
+        if (j < jTarg)
+        {
+                if (i > 254)
+                {
+                        i = 0;
+                        j++;
+                }
+                return;
+        }
+        if (i < iTarg)
+        {
+                return;
+        }
+        i = 0;
+        j = 0;
         if (fall)
         {
                 if (count < 2)
@@ -98,4 +136,9 @@ ISR(TIMER2_OVF_vect) {
 ISR(PCINT2_vect) {
         square = !(PIND & (1 << 2));
         sine   = !(PIND & (1 << 3));
+}
+
+ISR(ADC_vect) {
+        iTarg = ADCL;
+        jTarg = ADCH;
 }
